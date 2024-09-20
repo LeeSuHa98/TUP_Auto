@@ -1,0 +1,8 @@
+{
+    "json.trace.server": "off",
+    "json.schemas": [
+        
+
+    ],
+    "dotnetAcquisitionExtension.installTimeoutValue": 180
+}

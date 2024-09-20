@@ -1,0 +1,258 @@
+
+#######################
+# Source DB Connection
+#######################
+
+# Source DB type (Optional, generic | default | ORACLE)
+# ORACLE option needs SOURCE_LOGIN_AS property
+# GENERIC option needs SOURCE_DRIVER property
+SOURCE_TYPE=ORACLE
+
+# Source DB JDBC driver class name
+# Use with SOURCE_TYPE=GENERIC option
+SOURCE_DRIVER=oracle.jdbc.OracleDriver
+#SOURCE_DRIVER=com.mysql.jdbc.Driver
+
+# Source DB JDBC connection URL (Optional, Default=jdbc:oracle:thin:@localhost:1521:orcl)
+SOURCE_URL=jdbc:oracle:thin:@localhost:1539:orcl
+#SOURCE_URL=jdbc:mysql://127.0.0.1:3306/mysql
+# Source DB login ID (Optional, Default=sys)
+#SOURCE_USER="user1"
+SOURCE_USER=tibero
+
+# Source DB login password (Optional, Default=oracle)
+SOURCE_PASSWORD=tmax
+
+# Oracle source DB login option (Optional, Default=sysdba)
+# Use with SOURCE_TYPE=ORACLE option
+SOURCE_LOGIN_AS=NORMAL
+
+# Source table schema (Optional)
+# Default value is the same with SOURCE_USER
+#SOURCE_SCHEMA=SCOTT
+#SOURCE_SCHEMA="dbo"
+#SOURCE_SCHEMA=
+
+# Source table name (Mandatory)
+# SOURCE_TABLE=tableName1
+# SOURCE_TABLE="tableName2" (case-sensitive)
+# If the column is specified, data is extracted from the Source using the specified column
+# SOURCE_TABLE=t1(COL1, COL2, COL3), t2, t3("col1", "col2", "col3")
+# View could also be specified, in that case, EXTRACT_PARALLEL, EXTRACT_THREAD_COUNT and SOURCE_TABLE_DEDUPLICATE option may be not available.
+SOURCE_TABLE=t1
+
+# Ignore deadlock error that occur during migration for the tables created using the dedup option
+# Use when BATCH_THRESHOLD=1
+# If not, Data integrity is not guaranteed
+SOURCE_TABLE_DEDUPLICATE=N
+
+# Set which case to use as the default (Optional, UPPER | AUTO | LOWER, Default=AUTO)
+# UPPER means that the object name is converted to uppercase. ex) tAb -> TAB
+# AUTO means that the case of the object name is automatically determined by the TARGET_TYPE. (ORACLE & DEFAULT -> UPPER, POSTGRESQL -> LOWER)
+# LOWER means that the object name is converted to lowercase. ex) tAb -> tab
+# If you want to preserve the case of the object name, use object name with double quotes. ex) "tAb" -> "tAb"
+SOURCE_OBJECT_NAME_CASE_TYPE=UPPER
+
+#######################
+# Target DB Connection
+#######################
+
+# Target DB type (Optional, DEFAULT)
+TARGET_TYPE=DEFAULT
+
+# Target DB JDBC driver class name
+#TARGET_DRIVER=com.tmax.tibero.jdbc.TbDriver
+TARGET_DRIVER=com.m.internal.jdbc.MInternalDriver
+
+# Target DB JDBC connection URL (Optional, Default=jdbc:internal:thin:@localhost:8629:tibero)
+#TARGET_URL=jdbc:tibero:thin:@192.1.5.63:39208:tibero
+TARGET_URL=jdbc:internal:thin:@localhost:59166:tibero
+
+# Target DB login ID (Optional, Default=sys)
+#TARGET_USER="user1"
+TARGET_USER=tibero
+
+# Target DB login password (Optional, Default=tibero)
+TARGET_PASSWORD=tmax
+
+# Target table schema (Optional)
+# Default value is the same with TARGET_USER
+# TARGET_SCHEMA=TIBERO
+
+# Target table name (Optional)
+# Default value is the same with SOURCE_TABLE
+# TARGET_TABLE=t1
+# If the column is specified, data is loaded to the Target using the specified column
+# TARGET_TABLE=t1(c2, c1, c3), t2, t3("c2", "c1", "c3")
+# ex) Specifying SOURCE_TABLE=t1("col1", "col2", "col3"), TARGET_TABLE=t1("c2", "c1", "c3") is equivalent to
+# insert into t1("c2", "c1", "c3") (select "col1", "col2", "col3" from t1)
+
+# Set which case to use as the default (Optional, UPPER | AUTO | LOWER, Default=AUTO)
+# UPPER means that the object name is converted to uppercase. ex) tAb -> TAB
+# AUTO means that the case of the object name is automatically determined by the TARGET_TYPE. (ORACLE & DEFAULT -> UPPER, POSTGRESQL -> LOWER)
+# LOWER means that the object name is converted to lowercase. ex) tAb -> tab
+# If you want to preserve the case of the object name, use object name with double quotes. ex) "tAb" -> "tAb"
+TARGET_OBJECT_NAME_CASE_TYPE=UPPER
+
+#################
+# Data Extractor
+#################
+# Use parallel Extracting (Optional, Y | N Default=N)
+# This option is available only for SOURCE_TYPE is oracle, default or postgresql.
+# Since rows are divided according to hashing for the rowid, when migration progress, the rowid should not be changed by alter table move, etc
+EXTRACT_PARALLEL=N
+
+# Divide rows by ranging rowid.
+# This option would be beneficial for versions below oracle 10 that do not support the ora_hash function.
+# IOT table cannot utilize this option.
+# This option is available only for SOURCE_TYPE is oracle.
+# EXTRACT_PARALLEL option must be enabled, to enable EXTRACT_PARALLEL_RANGE_BY_ROWID.
+# EXTRACT_PARALLEL_RANGE_BY_ROWID=N
+
+# Number of data extractor thread (Optional, Default=1)
+# If the EXTRACT_PARALLEL_RANGE_BY_ROWID option is utilized, the EXTRACT_THREAD_COUNT can be adjusted to an appropriate value based on the number of extents.
+EXTRACT_THREAD_COUNT=1
+
+# Use TSN(or SCN) option (Optional)
+#SELECT_TSN=17322052
+
+# Where conditions (Optional)
+# ex. column1 > 10 AND column2 = 'abc'
+#SELECT_CONDITION= c1>1
+
+# Fetch size of source table cursor (Optional, Default=1024)
+# Some DB is not supported this feature.
+#SELECT_FETCH_SIZE=1024
+
+# Source table partition name (Optional)
+#SELECT_PARTITION=part1
+#SELECT_PARTITION="part2" (case-sensitive)
+#SELECT_PARTITION=
+
+# Source table subpartition name (Optional)
+# If specify both SELECT_PARTITION and SELECT_SUBPARTITION, only SELECT_PARTITION option is used.
+#SELECT_SUBPARTITION=subpar1
+#SELECT_SUBPARTITION="subpart2" (case-sensitive)
+#SELECT_SUBPARTITION=
+
+# Ignore source/target DB character set (Optional, y | N )
+SELECT_AS_BYTE=N
+
+# db_file_multiblock_read_count (Optional, Option for Oracle, Default=-1)
+DB_FILE_MULTIBLOCK_READ_COUNT=-1
+
+# Use optimizer hint. (Optional, Option for default, Oracle)
+# Use the table name as "t", meaning alias about the table name.
+# When used in conjunction with related to PARALLEL_HINT, this option takes precedence over other options.
+#OPTIMIZER_HINT=/*+ FULL(t) PARALLEL(t, 4) */
+
+# OPTIMIZER_HINT option can substitute options related to PARALLEL_HINT.
+# For convenience, options related to PARALLEL_HINT are kept.
+# Use parallel execution of SQL statements (Optional, Option for default, Oracle, Default=N)
+USE_PARALLEL_HINT=N
+
+# Use object-level parallel execution of SQL statements (Optional, Option for default, Oracle, Default=N)
+# To activate this option, USE_PARALLEL_HINT option must be enabled.
+USE_OBJECT_PARALLEL_HINT=N
+
+# Use with USE_PARALLEL_HINT=Y (Default=-1)
+PARALLEL_HINT_CNT=-1
+
+##############
+# Data Loader
+##############
+
+# Use direct path loading (Optional, CPL | DPL)
+# CPL means conventional path loading
+# DPL means direct path loading (This option is available only when TARGET_TYPE = DEFAULT.)
+INSERT_METHOD=dpl
+
+# Use commit size option(Optional, Default = commit once after loading)
+# set commit_size -1 to commit only once
+COMMIT_SIZE=-1
+
+# Use index disable option(Optional, Option for Default, Default = N, Y/N)
+INDEX_DISABLE=N
+
+# Use batch insert (Optional, Y | n)
+# Use with INSERT_METHOD=CPL option
+INSERT_BATCH=Y
+
+# batch threshold size (Optional, Default=32)
+BATCH_THRESHOLD=128
+
+# INSERT_METHOD=DPL option, print the number, when a certain number of rows have been loaded. (Optional, Default=500)
+# If DPL_LOG_UNIT is specified as 0, then it will not be logged.
+# ex) [L0] 500, [L0] 1000, ...
+DPL_LOG_UNIT=500
+
+# Use parallel loading (Optional, Y | n)
+INSERT_PARALLEL=N
+
+# Number of data loader thread (Optional, Default=4)
+# Use with INSERT_PARALLEL=Y option
+INSERT_THREAD_COUNT=1
+
+# Target table partition name (Optional)
+#INSERT_PARTITION=
+
+# Use zero length string data migration as null (Optional, Y | n, Default=Y, Option ignored for Oracle)
+# If set to N, the zero length data will be inserted as ' '.
+INSERT_ZERO_LENGTH_STRING_AS_NULL=Y
+
+# Trim leading and trailing pad character of CHAR type data. (Optional, Y | n, Default=N)
+#TRIM=
+
+##############                                
+# POSTGRESQL                                  
+##############                                
+                                              
+# Convert bytea type to blob type. (Default=N)
+# BYTEA_TO_BLOB=N                             
+                                              
+# Convert text type to clob type. (Default=N) 
+# TEXT_TO_CLOB=N                              
+
+##############
+# Common
+##############
+
+# Turn on the monitoring log. (Optional, Y|n, Default=N)
+# Print average time log about several operation, accompanied for migration.
+# MONITORING_LOG=N
+
+# The number of rows to use when averaging in the monitoring log. (Default=500)
+# MONITORING_LOG_UNIT=500
+
+# Enter the name of the stat to monitor.
+# This option is available only for SOURCE_TYPE is oracle.
+# Use ";" as a separator, when entering multiple stats.
+# The entered name of the stat is case-sensitive.
+# MONITORING_SESS_STAT=CPU used by this session;parse time cpu;parse count (hard)
+
+# Use MetaData Checking for DPL. (Optional, Default=Y)
+CHECK_COLUMN_METADATA=N
+
+# Row Queue Type (Optional, ARRAY | SYNCHRO, Default=Array)                     
+# It is advisable to utilize the SYNCHRO type when both the EXTRACT_PARALLEL option and the INSERT_PARALLEL option are enabled.
+# If the ARRAY type is selected, can specify the size as well. (Default=10240)
+# ROW_QUEUE_TYPE=ARRAY(10240)
+
+# Use verification table option (Optional, Y|n, Default=N)
+# and set verification table name. (Default=VERIFY_TBL)
+# VERIFY_TABLE=N
+# VERIFY_TABLE_NAME=VERIFY_TBL
+
+# Replace ASCII NULL character(0x00) with the specified character. (Optional, NONE | SPACE | EMPTY, Default=NONE)
+# Only available for TARGET_TYPE POSTGRESQL.
+# NONE : Do not replace.
+# SPACE : Replace with space.
+# NON_LOB_SPACE : Replace with space, except for LOB type.
+# EMPTY : Replace with empty string.
+# NON_LOB_EMPTY : Replace with empty string, except for LOB type.
+# REPLACE_ASCII_NULL=NONE
+
+# Log
+LOG_LEVEL=INFO
+LOG_FILE_NAME=tableMigrator.log
+#LOG_DIR=
