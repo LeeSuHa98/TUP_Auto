@@ -23,7 +23,7 @@ Oracle DBMS 연동을 위해 oracledb 라이브러리 설치를 진행한다. </
 ## TableMigrator
 
 TableMigrator의 경우 Tibero 설치 시 $TB_HOME/client/bin 경로에 T-UP.zip 파일로 떨궈진다.</br>
-T-UP.zip 압축 해제 시 아래와 같이 디렉터리 및 스크립트 파일을 볼 수 있다. ( 각 디렉터리 및 파일은 [T-UP 매뉴얼] 에서 자세한 설명을 확인할 수 있다. ) </br>
+T-UP.zip 압축 해제 시 아래와 같이 디렉터리 및 스크립트 파일을 볼 수 있다. ( 각 디렉터리 및 파일은 [T-UP 메뉴얼] 에서 자세한 설명을 확인할 수 있다. ) </br>
 
 
 ```
