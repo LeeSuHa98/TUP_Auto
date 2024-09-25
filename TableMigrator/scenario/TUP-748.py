@@ -1,10 +1,3 @@
-# 파이썬 DB 연동 코드 ( 컴포넌트화 가능함으로 폴더 분리 필요 )
-# tibero의 경우 window 에서 odbc 실행 시 ODBC 데이터원본 수정이 필요하므로 추후 가이드 문서 작성 예정
-# 파이썬의 경우 import pyodbc 라이브러리로 연동 가능 ( precondition 추가 필요 )
-# oracle db 연동의 경우 pip install oracledb 프롬프트 명령어를 통해 oracledb 라이브러리 설치 ( precondition 추가 필요 )
-# table migrator sh 을 수행하기 위해 import subprocess 라이브러리 추가 필요
-# 원격으로 리눅스에 접속하여 sh 을 수행하기 위해 pip install paramiko 라이브러리 설치 ( precondition 추가 필요)
-
 import sys
 import os
 
@@ -16,8 +9,7 @@ import main.oracle_info as oracle
 import main.tibero_info as tibero
 
 # 리눅스 원격 접속 함수
-
-def execute_command_on_remote(host, port, username, password, command):
+def execute_command_on_remote(host, port, username, password, command, file, tb_route):
     # SSH 클라이언트 생성
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -26,13 +18,30 @@ def execute_command_on_remote(host, port, username, password, command):
         # 원격 서버에 SSH 연결
         ssh.connect(host, port=port, username=username, password=password)
 
+        # SFTP 파일 전송
+        sftp = ssh.open_sftp()
+
+        # tablemigrator 에 필요한 properties 파일 원격 서버에 전송
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        local_file = os.path.join(current_dir, 'properties', file)  # Python 코드가 실행되는 로컬 파일 경로
+        if not os.path.exists(local_file):
+            raise FileNotFoundError(f"File not found: {local_file}")
+        
+        remote_file = tb_route + '/' + file
+        
+        sftp.put(local_file, remote_file)
+        
+        sftp.close()
+        
         # 명령어 실행
-        stdin, stdout, stderr = ssh.exec_command(command)
+        stdout, stderr = ssh.exec_command(command)
         
         # 명령어 출력 및 에러 가져오기
         output = stdout.read().decode()
         error = stderr.read().decode()
 
+        ssh.exec_command('rm -rf ', remote_file)
+        
         # 출력 반환
         return output, error
     except Exception as e:
@@ -68,7 +77,7 @@ def oracle_remote():
     )
     '''
 
-    oracle_conn = oracle.get_oracle_connection(user, pw, ip, port, sid)
+    oracle_conn = oracle.get_oracle_connection(ip, port, user, pw, sid)
     
     drop_query = "drop table tibero.SALES"
     
@@ -106,9 +115,10 @@ def tibero_remote():
     pw = "tmax"
     sid = "tibero"
 
-    tibero_conn = tibero.get_tibero_connection(driver, user, pw, ip, port, sid)
+    tibero_conn = tibero.get_tibero_connection(driver, ip, port, user, pw, sid)
     
     drop_query = "drop table tibero.SALES;"
+    
     tibero.drop(tibero_conn, drop_query)
     
     create_query = '''
@@ -145,26 +155,19 @@ def run_tablemigrator():
     tb_user = 'tibero7'
     tb_pw = 'tibero'
 
-    # 원격 명령어 실행 시 paramiko 라이브러리는 사용자의 홈 디렉터리에서 명령을 수행하기 때문에 jar 와 같은 파일을 읽어와야 하는 상황에선 class loading 에 실패한다. Error: 오류: 기본 클래스 com.m.migrator.Main을(를) 찾거나 로드할 수 없습니다. 와 같은
-    # 오류가 출력되는 것은 정상이다. 따라서 명령어 sh 파일을 수행하는 명령어 이전에 해당 디렉터리로 이동 후 스크립트를 수행해야한다.
-    # 이전 코드의 경우
-    # sh {home 경로}/{디렉터리 경로}/migrator.sh -> 해당 sh 을 읽을 수 없으므로 실패
-    # ssh 를 통해 명령어 수행 시에 비로그인셸로 수행되어 .bash_profile 설정이 로드되지 않아 실패되는 경우
-    # command = 'export JAVA_HOME=/path/to/java && sh /home/tibero7/table_migrator/migrator.sh' -> 실패 (paramiko  라이브러리의 경우 명령어는 해당 디렉토리에서 수행됨 )
+    tb_route = '/home/tibero7/table_migrator'
     
-    # table migrator 수행
-    # 기본 properties 설정 후 paramter 값 추가하는 방식으로
-    # 따로 mock 파일 만들어서 관리
-
-    command = 'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./migrator.properties_o2t INDEX_DISABLE=Y SOURCE_LOGIN_AS=normal SOURCE_TABLE=tibero.SALES TARGET_TABLE=tibero.SALES INSERT_PARTITION=sales_p1 SELECT_PARTITION=sales_p1'
-
-    # tablemigrator properties 기본값 
+    # tablemigrator properties 기본값
+    file = 'migrator.properties_TUP_748'
     
-    # tablemigrator properties 옵션 추가 값
+    # properties 옵션 추가 값
+    add_properties = 'INDEX_DISABLE=Y SOURCE_LOGIN_AS=normal SOURCE_TABLE=tibero.SALES TARGET_TABLE=tibero.SALES INSERT_PARTITION=sales_p1 SELECT_PARTITION=sales_p1'
     
     # 최종 tablemigrator properties
+    command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} {add_properties}'
     
-    output, error = execute_command_on_remote(host, port, tb_user, tb_pw, command)
+    print(command)
+    output, error = execute_command_on_remote(host, port, tb_user, tb_pw, command, file, tb_route)
 
     print("Output:", output)
     print("Error:", error)
@@ -189,12 +192,15 @@ user = "tibero"
 pw = "tmax"
 sid = "tibero"
 
-tibero_conn = tibero.get_tibero_connection(driver, user, pw, ip, port, sid)
+tibero_conn = tibero.get_tibero_connection(driver, ip, port, user, pw, sid)
 
 test_query = "SELECT INDEX_NAME, PARTITION_NAME, STATUS FROM DBA_IDX_PARTITIONS WHERE PARTITION_NAME LIKE 'SALES_P1';"
 
 for index, partition, status in tibero.select(tibero_conn, test_query):
+    
+    # 패치 후 결과
     if status == 'UNUSABLE':
         print('PASS')
+    # 패치 전 결과
     else:
         print("FAIL")
