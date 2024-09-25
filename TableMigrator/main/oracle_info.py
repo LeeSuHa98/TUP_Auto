@@ -1,6 +1,6 @@
 import oracledb
 
-def get_oracle_connection(user, pw, ip, port, sid):
+def get_oracle_connection(ip, port, user, pw,  sid):
     dsn = f"{ip}:{port}/{sid}"
 
     # Oracle Instant Client 경로 설정
@@ -82,5 +82,17 @@ def create_index(oracle_conn, create_index_query):
         print("Index created successfully.")
     except oracledb.DatabaseError as e:
         print(f"Error creating Index: {e}")
+    finally:
+        cursor.close()
+
+# 테이블 데이터 삭제 함수
+def truncate(oracle_conn, truncate_query):
+    cursor = oracle_conn.cursor()
+    cursor.execute(truncate_query)
+    try:
+        cursor.execute(truncate_query)
+        print("Table Truncated successfully.")
+    except oracledb.DatabaseError as e:
+        print(f"Error Truncated table: {e}")
     finally:
         cursor.close()

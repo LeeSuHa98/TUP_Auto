@@ -1,6 +1,6 @@
 import pyodbc as odbc
 
-def get_tibero_connection(driver, user, pw, ip, port, sid):
+def get_tibero_connection(driver, ip, port, user, pw, sid):
     # DNS-less 설정을 통해 ODBC 드라이버 직접 지정하도록 수정.
     dsn = f"DRIVER={driver};SERVER={ip};PORT={port};UID={user};PWD={pw};DB={sid}"
 
@@ -79,5 +79,17 @@ def create_index(tibero_conn, create_index_query):
         print("Index created successfully.")
     except odbc.Error as e:
         print(f"Error creating Index: {e}")
+    finally:
+        cursor.close()
+        
+# 테이블 데이터 삭제 함수
+def truncate(tibero_conn, truncate_query):
+    cursor = tibero_conn.cursor()
+    
+    try:
+        cursor.execute(truncate_query)
+        print("Table Truncated successfully.")
+    except odbc.Error as e:
+        print(f"Error Truncated table: {e}")
     finally:
         cursor.close()
