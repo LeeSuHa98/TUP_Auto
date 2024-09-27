@@ -60,12 +60,16 @@ def create(oracle_conn, create_query):
 # 데이터 삽입 함수
 # bind_values : batch 방식으로 data insert 하기 위한 bind value 값
 # insert_query : 한번에 insert를 하기 위한 insert bind query
-def insert(oracle_conn, bind_values, insert_query):
+def insert(oracle_conn, insert_query, bind_values=None):
     cursor = oracle_conn.cursor()
 
     try:
         # 벌크 삽입을 위해 executemany 사용
-        cursor.executemany(insert_query, bind_values)
+        if bind_values:
+            cursor.executemany(insert_query, bind_values)
+        else: 
+            cursor.execute(insert_query)
+            
         oracle_conn.commit()
         print("Data inserted successfully.")
     except oracledb.DatabaseError as e:
@@ -94,5 +98,17 @@ def truncate(oracle_conn, truncate_query):
         print("Table Truncated successfully.")
     except oracledb.DatabaseError as e:
         print(f"Error Truncated table: {e}")
+    finally:
+        cursor.close()
+        
+# alter 함수
+def alter(oracle_conn, alter_query):
+    cursor = oracle_conn.cursor()
+    cursor.execute(alter_query)
+    try:
+        cursor.execute(alter_query)
+        print("ALTER query executed successfully.")
+    except oracledb.DatabaseError as e:
+        print(f"Error ALTER query: {e}")
     finally:
         cursor.close()
