@@ -81,7 +81,7 @@ sid = "tibero"
 tb_route = '/home/tibero7/table_migrator'
 
 # tablemigrator properties 기본값
-file = 'migrator.properties_TUP_750'
+file = 'migrator.properties_O2T'
  
 # properties 옵션 추가 값
 add_properties = [

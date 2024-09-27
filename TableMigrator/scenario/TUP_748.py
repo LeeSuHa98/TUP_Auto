@@ -114,7 +114,7 @@ def run_tablemigrator():
     tb_route = '/home/tibero7/table_migrator'
     
     # tablemigrator properties 기본값
-    file = 'migrator.properties_TUP_748'
+    file = 'migrator.properties_O2T'
     
     # properties 옵션 추가 값
     add_properties = 'INDEX_DISABLE=Y SOURCE_LOGIN_AS=normal SOURCE_TABLE=tibero.SALES TARGET_TABLE=tibero.SALES INSERT_PARTITION=sales_p1 SELECT_PARTITION=sales_p1'

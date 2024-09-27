@@ -16,7 +16,7 @@ def run_tablemigrator():
     tb_route = '/home/tibero7/table_migrator'
     
     # tablemigrator properties 기본값
-    file = 'migrator.properties_TUP_749'
+    file = 'migrator.properties_T2T'
     
     # properties 옵션 추가 값
     add_properties = 'SOURCE_TABLE=tibero.TEST_749 TARGET_TABLE=tibero.DUAL'
