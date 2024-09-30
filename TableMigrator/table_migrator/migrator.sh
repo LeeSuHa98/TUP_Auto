@@ -1,1 +1,0 @@
-java -classpath migrator_cli.jar:tibero7-jdbc.jar:ojdbc8.jar:postgresql-42.2.27.jre6.jar:msllogger-14.jar:toolcom.jar:internal-jdbc-16.jar:antlr-4.3-complete.jar com.m.migrator.Main "$@"
