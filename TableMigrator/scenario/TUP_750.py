@@ -3,9 +3,9 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import main.oracle_info as oracle 
-import main.tibero_info as tibero
-import main.execute_linux as execute
+import module.oracle_info as oracle 
+import module.tibero_info as tibero
+import module.execute_linux as execute
         
 # oracle 접속 정보
 def oracle_remote():
@@ -85,9 +85,9 @@ file = 'migrator.properties_O2T'
  
 # properties 옵션 추가 값
 add_properties = [
-    'INSERT_ZERO_LENGTH_STRING_AS_NULL=Y SOURCE_TABLE=mig_test TARGET_TABLE=t270457_y SOURCE_LOGIN_AS=normal',
-    'INSERT_ZERO_LENGTH_STRING_AS_NULL=N SOURCE_TABLE=mig_test TARGET_TABLE=t270457_n SOURCE_LOGIN_AS=normal',
-    'SOURCE_TABLE=mig_test TARGET_TABLE=t270457_x SOURCE_LOGIN_AS=normal'
+    'INSERT_ZERO_LENGTH_STRING_AS_NULL=Y SOURCE_TABLE=mig_test TARGET_TABLE=t270457_y',
+    'INSERT_ZERO_LENGTH_STRING_AS_NULL=N SOURCE_TABLE=mig_test TARGET_TABLE=t270457_n',
+    'SOURCE_TABLE=mig_test TARGET_TABLE=t270457_x'
 ]
 
 count=0

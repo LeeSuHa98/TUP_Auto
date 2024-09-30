@@ -4,7 +4,7 @@ import os
 # 현재 파일 기준으로 상위 디렉토리의 main 경로를 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import main.execute_linux as execute
+import module.execute_linux as execute
 
 # tablemigrator 수행
 def run_tablemigrator():

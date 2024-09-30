@@ -3,9 +3,9 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import main.oracle_info as oracle 
-import main.tibero_info as tibero
-import main.execute_linux as execute
+import module.oracle_info as oracle 
+import module.tibero_info as tibero
+import module.execute_linux as execute
 
 # Source DB - Oracle
 
@@ -321,7 +321,7 @@ tb_route = '/home/tibero7/table_migrator'
 # tablemigrator properties 기본값
 file = 'migrator.properties_O2T'
  
-command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} SOURCE_LOGIN_AS=normal SOURCE_TABLE=tibero.tbl_tup_1 TARGET_TABLE=tibero.tbl_tup_1 '
+command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} SOURCE_TABLE=tibero.tbl_tup_1 TARGET_TABLE=tibero.tbl_tup_1 '
 
 output, error = execute.execute_command_on_remote('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
 
