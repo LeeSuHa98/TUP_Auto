@@ -20,10 +20,14 @@ def select(tibero_conn, select_query):
         cursor.execute(select_query)
         # 모든 행을 가져옴
         rows = cursor.fetchall()
+        
+        # 쿼리 결과값이 float으로 가져와져서 int로 반환하는 코드 추가
+        int_rows = [tuple(map(int, row)) for row in rows]
+        
         # 결과 출력 (또는 원하는 대로 처리)
-        for row in rows:
+        for row in int_rows:
             print(row)
-        return rows  
+        return int_rows  
     except odbc.Error as e:
         print(f"Error executing SELECT query: {e}")
         return None
@@ -57,12 +61,16 @@ def drop(tibero_conn, drop_query):
 # 데이터 삽입 함수
 # bind_values : batch 방식으로 data insert 하기 위한 bind value 값
 # insert_query : 한번에 insert를 하기 위한 insert bind query
-def insert(tibero_conn, bind_values, insert_query):
+def insert(tibero_conn, insert_query, bind_values=None):
     cursor = tibero_conn.cursor()
 
     try:
         # 벌크 삽입을 위해 executemany 사용
-        cursor.executemany(insert_query, bind_values)
+        if bind_values:
+            cursor.executemany(insert_query, bind_values)
+        else: 
+            cursor.execute(insert_query)
+            
         tibero_conn.commit()
         print("Data inserted successfully.")
     except odbc.Error as e:
@@ -91,5 +99,28 @@ def truncate(tibero_conn, truncate_query):
         print("Table Truncated successfully.")
     except odbc.Error as e:
         print(f"Error Truncated table: {e}")
+    finally:
+        cursor.close()
+
+def create_user(tibero_conn, user, passwod):
+    cursor = tibero_conn.cursor()
+    
+    try:
+        cursor.execute('create user '+ user + ' identified by ' + passwod + ';')
+        cursor.execute('grant dba to ' + user + ';')
+        print("Create User successfully.")
+    except odbc.Error as e:
+        print(f"Error Create User: {e}")
+    finally:
+        cursor.close()
+
+def drop_user(tibero_conn, user):
+    cursor = tibero_conn.cursor()
+    
+    try:
+        cursor.execute('drop user ' + user + ' cascade;')
+        print("Drop User successfully.")
+    except odbc.Error as e:
+        print(f"Error Drop User: {e}")
     finally:
         cursor.close()
