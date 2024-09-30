@@ -3,9 +3,9 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import main.oracle_info as oracle 
-import main.tibero_info as tibero
-import main.execute_linux as execute
+import module.oracle_info as oracle 
+import module.tibero_info as tibero
+import module.execute_linux as execute
 
 # oracle 접속 정보
 def oracle_remote():
