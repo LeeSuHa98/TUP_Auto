@@ -3,6 +3,7 @@ SOURCE_DRIVER=oracle.jdbc.OracleDriver
 SOURCE_URL=jdbc:oracle:thin:@192.168.17.31:1521:cdb1
 SOURCE_USER=tibero
 SOURCE_PASSWORD=tmax
+SOURCE_LOGIN_AS=normal
 BATCH_THRESHOLD=128
 TARGET_TYPE=DEFAULT
 TARGET_DRIVER=com.m.internal.jdbc.MInternalDriver
