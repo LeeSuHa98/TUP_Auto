@@ -1,6 +1,6 @@
 import oracledb
 
-def get_oracle_connection(ip, port, user, pw,  sid):
+def get_oracle_connection(ip, port, user, pw,  sid, mode=None):
     dsn = f"{ip}:{port}/{sid}"
 
     # Oracle Instant Client 경로 설정
@@ -10,7 +10,7 @@ def get_oracle_connection(ip, port, user, pw,  sid):
     
     # 데이터베이스 연결
     try:
-        oracle_conn = oracledb.connect(user=user, password=pw, dsn=dsn)
+        oracle_conn = oracledb.connect(user=user, password=pw, dsn=dsn, mode=mode)
         return oracle_conn
     except oracledb.DatabaseError as e:
         print(f"Error connecting to Oracle: {e}")
@@ -110,5 +110,41 @@ def alter(oracle_conn, alter_query):
         print("ALTER query executed successfully.")
     except oracledb.DatabaseError as e:
         print(f"Error ALTER query: {e}")
+    finally:
+        cursor.close()
+        
+def create_user(oracle_conn, user, password):
+    cursor = oracle_conn.cursor()
+    
+    cursor.execute("SELECT name FROM v$pdbs WHERE OPEN_MODE LIKE '%READ WRITE%'")
+    pdb_list = cursor.fetchall()
+    
+    if not pdb_list:
+        print("No PDB found in READ WRITE mode.")
+        return
+
+    pdb_name = pdb_list[0][0]
+    
+    try:
+        cursor.execute(f"ALTER SESSION SET CONTAINER = {pdb_name}")
+        cursor.execute(f'create user {user} identified by {password}')
+        cursor.execute(f'grant CONNECT to {user}')
+        cursor.execute(f'grant RESOURCE to {user}')
+        cursor.execute(f'alter user {user} default tablespace users')
+        cursor.execute(f'alter user {user} quota unlimited on users')
+        print("Create User successfully.")
+    except oracledb.DatabaseError as e:
+        print(f"Error Create User: {e}")
+    finally:
+        cursor.close()
+
+def drop_user(oracle_conn, user):
+    cursor = oracle_conn.cursor()
+    
+    try:
+        cursor.execute('drop user ' + user + ' cascade')
+        print("Drop User successfully.")
+    except oracledb.DatabaseError as e:
+        print(f"Error Drop User: {e}")
     finally:
         cursor.close()

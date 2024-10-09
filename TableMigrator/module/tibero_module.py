@@ -21,9 +21,21 @@ def select(tibero_conn, select_query):
         # 모든 행을 가져옴
         rows = cursor.fetchall()
         
-        # 쿼리 결과값이 float으로 가져와져서 int로 반환하는 코드 추가
-        int_rows = [tuple(map(int, row)) for row in rows]
-        
+        int_rows = []   
+        for row in rows:
+            processed_row = []
+            for item in row:
+                if isinstance(item, float):
+                    processed_row.append(int(item))  # float을 int로 변환
+                elif isinstance(item, bytes):  # 이진 데이터인 경우
+                    try:
+                        processed_row.append(item.decode('utf-8'))  # utf-8로 디코딩
+                    except UnicodeDecodeError:
+                        processed_row.append(repr(item))  # 바이트 값을 문자열 형식으로 표시
+                else:
+                    processed_row.append(str(item))  # 나머지는 문자열로 변환
+            int_rows.append(processed_row)
+                    
         # 결과 출력 (또는 원하는 대로 처리)
         for row in int_rows:
             print(row)
@@ -124,3 +136,13 @@ def drop_user(tibero_conn, user):
         print(f"Error Drop User: {e}")
     finally:
         cursor.close()
+        
+# 튜플을 비교하는 함수
+def check_tuple_exists(tibero_conn, select_query, compare_tuple):
+    results = select(tibero_conn, select_query)
+    if results is None:
+        return False
+
+    if compare_tuple in [rows for rows in results]:
+        return True
+    return False
