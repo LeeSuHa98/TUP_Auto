@@ -3,9 +3,9 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import module.oracle_info as oracle 
-import module.tibero_info as tibero
-import module.execute_linux as execute
+import module.oracle_module as oracle 
+import module.tibero_module as tibero
+import module.shell_module as execute
         
 # oracle 접속 정보
 def oracle_remote():
@@ -123,7 +123,7 @@ def run_tablemigrator():
     command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} {add_properties}'
     
     print(command)
-    output, error = execute.execute_command_on_remote(host, port, tb_user, tb_pw, command, file, tb_route)
+    output, error = execute.execute_shell(host, port, tb_user, tb_pw, command, file, tb_route)
 
     print("Output:", output)
     print("Error:", error)

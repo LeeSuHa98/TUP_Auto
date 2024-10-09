@@ -3,9 +3,9 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import module.oracle_info as oracle 
-import module.tibero_info as tibero
-import module.execute_linux as execute
+import module.oracle_module as oracle 
+import module.tibero_module as tibero
+import module.shell_module as execute
 
 # Source DB - Oracle
 
@@ -43,7 +43,7 @@ results = []
 for row in commands:
     command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} {commands[row]}'
 
-    output, error = execute.execute_command_on_remote('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
+    output, error = execute.execute_shell('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
 
     if row == 1 and tibero.select(tibero_conn, 'select * from tibero.T283075_A')[0] == (10, 20, 30):
         results.append(f"TC {row} : PASS")

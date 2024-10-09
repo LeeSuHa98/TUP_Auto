@@ -3,9 +3,9 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import module.oracle_info as oracle 
-import module.tibero_info as tibero
-import module.execute_linux as execute
+import module.oracle_module as oracle 
+import module.tibero_module as tibero
+import module.shell_module as execute
 
 # Source DB - Oracle
 
@@ -28,7 +28,7 @@ file = 'migrator.properties_O2T'
 
 command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} SOURCE_TABLE="tibero.T283075_A(C1, C20, C3)" TARGET_TABLE="tibero.T283075_A(c1, c2, c3)" '
 
-output, error = execute.execute_command_on_remote('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
+output, error = execute.execute_shell('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
 
 if 'java.lang.Exception: Source Table "T283075_A" has been specified invalid column(s) : "C20"' in output:
     print("PASS")

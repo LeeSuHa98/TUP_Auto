@@ -3,8 +3,8 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-import module.tibero_info as tibero
-import module.execute_linux as execute
+import module.tibero_module as tibero
+import module.shell_module as execute
 
 # Source DB - Tibero
 tibero_conn = tibero.get_tibero_connection("{Tibero 7 ODBC Driver}", "192.168.17.33", 12000, "tibero", "tmax", "tibero")
@@ -32,7 +32,7 @@ file = 'migrator.properties_T2T'
 
 command = f'cd /home/tibero7/table_migrator && sh migrator.sh PROPERTY_FILE=./{file} SOURCE_USER=src283075 SOURCE_TABLE=\'t1(COL1, COL2, COL3), t2, t3("col1", "col2", "col3")\' TARGET_USER=trg283075 TARGET_TABLE=\'t1(col2, col1, col3), t2, t3("col2", "col1", "col3")\' '
 
-output, error = execute.execute_command_on_remote('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
+output, error = execute.execute_shell('192.168.17.33', 22, 'tibero7', 'tibero', command, file, tb_route)
 
 if (
     tibero.select(tibero_conn, 'select * from trg283075.t1')[0] == (20, 10, 30) and 
